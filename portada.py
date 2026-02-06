@@ -15,16 +15,15 @@ if "pin_correcto" not in st.session_state:
 
 if not st.session_state.pin_correcto:
     st.markdown("<h1 style='text-align: center; color: #FF8C00;'>BLOQUEO DE SEGURIDAD</h1>", unsafe_allow_html=True)
-    # Centramos el input del PIN
     col_p1, col_p2, col_p3 = st.columns([1, 2, 1])
     with col_p2:
         pin = st.text_input("Introduce el PIN de acceso", type="password")
-        if pin == "1234":  # <--- CAMBIA AQUÍ TU PIN
+        if pin == "1234":  # <--- TU PIN
             st.session_state.pin_correcto = True
             st.rerun()
         elif pin:
             st.error("PIN Incorrecto")
-    st.stop() # Detiene la ejecución hasta que el PIN sea correcto
+    st.stop()
 
 # --- 2. PERSISTENCIA DE DATOS ---
 def cargar_usuarios():
@@ -103,13 +102,14 @@ else:
     user = st.session_state.usuario_actual
     datos = st.session_state.datos_usuarios[user]
     
-    # --- CÁLCULO ESTIMADO (TMB) ---
     peso_v = float(datos.get("peso", 70.0))
     edad_v = int(datos.get("edad", 30))
     act_v = int(datos.get("actividad", 5))
+    
+    # Cálculo TMB Harris-Benedict
     base_cal = (10 * peso_v) + (6.25 * 170) - (5 * edad_v)
     adj = 5 if user == "David" else -161
-    kcal_objetivo = (base_cal + adj) * (1.2 + (act_val * 0.05)) if 'act_val' in locals() else (base_cal + adj) * (1.2 + (act_v * 0.05))
+    kcal_objetivo = (base_cal + adj) * (1.2 + (act_v * 0.05))
 
     tabs = st.tabs(["👤 Perfil", "🥗 Nutrición", "🏋️ Deporte", "💾 Alimentos", "📊 Historial"])
 
@@ -120,15 +120,16 @@ else:
         if up:
             st.session_state.datos_usuarios[user]["foto"] = f"data:image/png;base64,{base64.b64encode(up.read()).decode()}"
             guardar_usuarios(); st.rerun()
-        new_pe = st.number_input("Peso (kg)", value=peso_v, step=0.1)
-        new_ed = st.number_input("Edad", value=edad_v)
-        new_ac = st.slider("Actividad", 1, 10, value=act_v)
+        n_p = st.number_input("Peso (kg)", value=peso_v, step=0.1)
+        n_e = st.number_input("Edad", value=edad_v)
+        n_a = st.slider("Actividad", 1, 10, value=act_v)
         if st.button("Guardar Datos 💾"):
-            st.session_state.datos_usuarios[user].update({"peso": new_pe, "edad": new_ed, "actividad": new_ac})
+            st.session_state.datos_usuarios[user].update({"peso": n_p, "edad": n_e, "actividad": n_a})
             guardar_usuarios(); st.success("¡Hecho!"); st.rerun()
         if st.button("Cerrar Sesión 🚪"): st.session_state.autenticado = False; st.rerun()
 
     with tabs[1]:
+        st.markdown("### Balance de Hoy")
         hoy = str(date.today())
         regs = [r for r in datos["registros"] if r["Fecha"] == hoy]
         neto = sum(r.get("Kcal", 0) for r in regs)
@@ -139,8 +140,9 @@ else:
         
         st.divider()
         sel = st.selectbox("Alimento:", ["---"] + ["✨ MANUAL"] + sorted(list(st.session_state.base_alimentos.keys())))
+        
         if sel == "✨ MANUAL":
-            nom_m = st.text_input("Qué has comido?")
+            nom_m = st.text_input("¿Qué has comido?")
             kcal_m = st.number_input("Kcal totales:")
             if st.button("Añadir"):
                 st.session_state.datos_usuarios[user]["registros"].append({"Fecha": hoy, "Momento": "Manual", "Alimento": nom_m or "Manual", "Kcal": round(kcal_m, 1)})
@@ -148,7 +150,65 @@ else:
         elif sel != "---":
             m = st.session_state.base_alimentos.get(sel, {})
             cal_b, med = m.get('Calorías', 0), m.get('Medida', 'Gr')
-            cant = st.number_input(f"Cantidad ({med})")
+            cant = st.number_input(f"Cantidad ({med})", min_value=0.0)
             if st.button("Añadir ✅"):
-                v_k = cal_b * (cant/100) if med.lower() in ["gr", "ml"] else cal_b * cant
-                st.session_state.datos_usuarios[user]["registros"].append({"Fecha": hoy, "Alimento": sel, "Kcal": round
+                factor = (cant/100) if med.lower() in ["gr", "ml"] else cant
+                st.session_state.datos_usuarios[user]["registros"].append({
+                    "Fecha": hoy, 
+                    "Alimento": sel, 
+                    "Kcal": round(cal_b * factor, 1)
+                })
+                guardar_usuarios(); st.rerun()
+
+    with tabs[2]:
+        st.markdown("### Registro de Deporte")
+        tipo = st.selectbox("Entreno:", ["Gym", "Spinning", "Cardio", "Descanso"])
+        if tipo == "Spinning":
+            km = st.number_input("Km")
+            kc = st.number_input("Kcal quemadas")
+            if st.button("Guardar Spinning 🚴"):
+                st.session_state.datos_usuarios[user]["registros"].append({
+                    "Fecha": hoy, 
+                    "Momento": "Deporte", 
+                    "Alimento": f"Spinning ({km}km)", 
+                    "Kcal": -abs(float(kc))
+                })
+                guardar_usuarios(); st.rerun()
+        else:
+            pasos = st.number_input("Pasos", value=8000)
+            if st.button(f"Guardar {tipo} ✅"):
+                st.session_state.datos_usuarios[user]["registros"].append({
+                    "Fecha": hoy, 
+                    "Momento": "Deporte", 
+                    "Alimento": tipo, 
+                    "Kcal": 0
+                })
+                guardar_usuarios(); st.rerun()
+
+    with tabs[3]:
+        st.markdown("### Base de Datos")
+        df_base = pd.DataFrame(st.session_state.base_alimentos).T.reset_index().rename(columns={'index': 'Alimento'})
+        df_base = df_base.drop(columns=[c for c in ['h','p','g','kcal','H','P','G','Kcal'] if c in df_base.columns])
+        df_ed = st.data_editor(df_base, num_rows="dynamic", use_container_width=True, hide_index=True)
+        if st.button("Guardar Tabla 💾"):
+            st.session_state.base_alimentos = df_ed.set_index('Alimento').to_dict('index')
+            guardar_alimentos(); st.rerun()
+
+    with tabs[4]:
+        st.markdown("### Historial")
+        if datos["registros"]:
+            f_s = st.date_input("Día:", value=date.today())
+            df_h = pd.DataFrame(datos["registros"])
+            df_d = df_h[df_h["Fecha"] == str(f_s)].copy()
+            if not df_d.empty:
+                df_dia_ed = st.data_editor(df_d, use_container_width=True, hide_index=True, num_rows="dynamic", key=f"h_{f_s}")
+                if st.button("Guardar Cambios 💾"):
+                    otros = [r for r in datos["registros"] if r["Fecha"] != str(f_s)]
+                    st.session_state.datos_usuarios[user]["registros"] = otros + df_dia_ed.to_dict('records')
+                    guardar_usuarios(); st.rerun()
+                
+                out = io.BytesIO()
+                with pd.ExcelWriter(out, engine='xlsxwriter') as w:
+                    df_d.to_excel(w, index=False)
+                st.download_button("📥 Descargar Excel", data=out.getvalue(), file_name=f"Cuchitos_{user}_{f_s}.xlsx")
+            else: st.info("Sin registros.")
