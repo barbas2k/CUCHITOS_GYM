@@ -41,6 +41,7 @@ def guardar_alimentos():
     with open("alimentos.json", "w") as f:
         json.dump(st.session_state.base_alimentos, f, indent=4)
 
+# Inicialización
 if "datos_usuarios" not in st.session_state:
     st.session_state.datos_usuarios = cargar_usuarios()
 if "base_alimentos" not in st.session_state:
@@ -50,7 +51,7 @@ if "autenticado" not in st.session_state:
 if "pin_correcto" not in st.session_state:
     st.session_state.pin_correcto = False
 
-# 3. CSS RESPONSIVO ULTRA (PARA MÓVIL)
+# 3. CSS DE CENTRADO TOTAL (BLINDAJE)
 def aplicar_estilos(archivo_fondo=None):
     b64 = ""
     if archivo_fondo and os.path.exists(archivo_fondo):
@@ -60,51 +61,139 @@ def aplicar_estilos(archivo_fondo=None):
         <style>
         .stApp {{ background: {f'url("data:image/png;base64,{b64}")' if b64 else "#121212"}; background-size: cover; background-position: center; }}
         [data-testid="stHeader"], .stDeployButton, header, footer, #MainMenu {{ visibility: hidden !important; display: none !important; }}
-        .block-container {{ padding: 1rem 0.5rem !important; max-width: 100% !important; }}
         
-        @media (max-width: 480px) {{
-            .titulo-arriba {{ font-size: 38px !important; }}
-            [data-testid="stMetricValue"] {{ font-size: 1.4rem !important; }}
-            .stTabs [data-baseweb="tab"] {{ font-size: 16px !important; padding: 10px 5px !important; }}
+        /* CENTRADO TOTAL DE LA COLUMNA PRINCIPAL */
+        .block-container {{ 
+            padding: 1rem 0.5rem !important; 
+            max-width: 600px !important; 
+            margin: 0 auto !important;
+            text-align: center !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
         }}
 
-        div.stButton > button {{ width: 100% !important; background-color: #FF8C00 !important; color: white !important; font-weight: bold !important; border-radius: 12px !important; border: 1px solid black !important; padding: 10px !important; }}
-        [data-testid="stImage"] img {{ border-radius: 50% !important; border: 4px solid #FF8C00 !important; max-width: 140px !important; margin: 0 auto !important; }}
-        .titulo-arriba {{ width: 100%; text-align: center; color: #FF8C00; font-size: 50px; font-weight: 900; text-shadow: 2px 2px 5px #000; margin-bottom: 10px; }}
-        .stNumberInput, .stSelectbox, .stTextInput, .stSlider {{ width: 100% !important; }}
+        /* CENTRADO DE CADA ELEMENTO VERTICAL */
+        [data-testid="stVerticalBlock"] > div {{
+            width: 100% !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
+            text-align: center !important;
+        }}
+
+        /* BOTONES: FUERZA CENTRADO Y ANCHO */
+        div.stButton {{
+            display: flex !important;
+            justify-content: center !important;
+            width: 100% !important;
+            margin: 10px 0 !important;
+        }}
+        div.stButton > button {{ 
+            width: 90% !important; 
+            background-color: #FF8C00 !important; 
+            color: white !important; 
+            font-weight: 900 !important; 
+            font-size: 22px !important;
+            padding: 12px !important;
+            border-radius: 15px !important; 
+            border: 3px solid black !important; 
+            box-shadow: 4px 4px 0px #000;
+            text-transform: uppercase;
+        }}
+
+        /* FOTO: CENTRADO */
+        [data-testid="stImage"] {{
+            display: flex !important;
+            justify-content: center !important;
+            width: 100% !important;
+        }}
+        [data-testid="stImage"] img {{ 
+            border-radius: 50% !important; 
+            border: 5px solid #FF8C00 !important; 
+            width: 180px !important; 
+            height: 180px !important; 
+            object-fit: cover;
+        }}
+
+        /* TEXTOS Y TÍTULOS */
+        .texto-borde {{
+            color: #FF8C00; 
+            font-size: 42px; 
+            font-weight: 900;
+            text-shadow: 3px 3px 0px #000, -1px -1px 0px #000, 1px -1px 0px #000, -1px 1px 0px #000, 1px 1px 0px #000;
+            line-height: 1.1;
+            margin: 20px 0;
+            text-align: center !important;
+            width: 100%;
+        }}
+        .titulo-arriba {{ 
+            color: #FF8C00; 
+            font-size: 55px; 
+            font-weight: 900; 
+            text-shadow: 5px 5px 0px #000; 
+            text-align: center !important;
+            width: 100%;
+            margin-bottom: 30px;
+        }}
+
+        /* MÉTRICAS AL CENTRO */
+        [data-testid="stMetric"] {{
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 100% !important;
+        }}
+        [data-testid="stMetricValue"] {{ 
+            color: #FF8C00 !important; 
+            font-weight: 900 !important; 
+            font-size: 2rem !important;
+        }}
+
+        /* INPUTS Y SELECTORES AL CENTRO */
+        .stNumberInput, .stSelectbox, .stTextInput, .stSlider, .stFileUploader {{ 
+            width: 90% !important; 
+            margin: 0 auto !important; 
+            text-align: center !important;
+        }}
+        label {{ text-align: center !important; width: 100% !important; color: white !important; font-size: 1.1rem !important; }}
         </style>
         """, unsafe_allow_html=True)
 
-# --- 4. LÓGICA DE NAVEGACIÓN ---
+# --- 4. NAVEGACIÓN ---
 
-# PANTALLA A: PIN
+# PANTALLA 1: PIN
 if not st.session_state.pin_correcto:
     aplicar_estilos("portada.png")
     st.markdown('<div class="titulo-arriba">CUCHITOS<br>GYM</div>', unsafe_allow_html=True)
-    st.markdown("<br>"*10, unsafe_allow_html=True)
-    col_p1, col_p2, col_p3 = st.columns([0.1, 0.8, 0.1])
-    with col_p2:
-        pin = st.text_input("Introduce el PIN", type="password")
-        if pin == "1234": # <--- PIN
-            st.session_state.pin_correcto = True
-            st.rerun()
+    st.markdown('<div class="texto-borde">INTRODUCE EL PIN</div>', unsafe_allow_html=True)
+    pin = st.text_input("PIN", type="password", label_visibility="collapsed")
+    if pin == "1234":
+        st.session_state.pin_correcto = True
+        st.rerun()
     st.stop()
 
-# PANTALLA B: SELECCIÓN USUARIO
+# PANTALLA 2: SELECCIÓN USUARIO
 elif not st.session_state.autenticado:
     aplicar_estilos("portada.png")
     st.markdown('<div class="titulo-arriba">CUCHITOS<br>GYM</div>', unsafe_allow_html=True)
-    st.markdown("<br>"*10, unsafe_allow_html=True)
-    col_btn1, col_btn2 = st.columns(2)
-    with col_btn1:
-        if st.button("DAVID 👑"):
-            st.session_state.usuario_actual = "David"; st.session_state.autenticado = True; st.rerun()
-    with col_btn2:
-        if st.button("MARIA JOSE 🎀"):
-            st.session_state.usuario_actual = "Maria Jose"; st.session_state.autenticado = True; st.rerun()
-    if st.button("Bloquear 🔒"): st.session_state.pin_correcto = False; st.rerun()
+    st.markdown("<div style='height: 50px;'></div>", unsafe_allow_html=True)
+    
+    if st.button("DAVID 👑"):
+        st.session_state.usuario_actual = "David"; st.session_state.autenticado = True; st.rerun()
+    
+    if st.button("MARIA JOSE 🎀"):
+        st.session_state.usuario_actual = "Maria Jose"; st.session_state.autenticado = True; st.rerun()
+    
+    st.markdown("<div style='height: 40px;'></div>", unsafe_allow_html=True)
+    if st.button("BLOQUEAR 🔒"):
+        st.session_state.pin_correcto = False
+        st.rerun()
 
-# PANTALLA C: APP PRINCIPAL
+# PANTALLA 3: APP
 else:
     aplicar_estilos() 
     user = st.session_state.usuario_actual
@@ -121,95 +210,90 @@ else:
     tabs = st.tabs(["👤", "🥗", "🏋️", "💾", "📊"])
 
     with tabs[0]: # PERFIL
-        st.markdown(f"### {user}")
+        st.markdown(f"### PERFIL: {user}")
         st.image(datos.get("foto") or "https://cdn-icons-png.flaticon.com/512/3135/3135715.png")
-        up = st.file_uploader("Foto", type=["jpg", "png"], key="up_p", label_visibility="collapsed")
-        if up:
-            st.session_state.datos_usuarios[user]["foto"] = f"data:image/png;base64,{base64.b64encode(up.read()).decode()}"
-            guardar_usuarios(); st.rerun()
+        st.file_uploader("Subir Foto", type=["jpg", "png"], key="up_p", label_visibility="collapsed")
+        
         n_p = st.number_input("Peso (kg)", value=peso_v, step=0.1)
         n_e = st.number_input("Edad", value=edad_v)
         n_a = st.slider("Actividad", 1, 10, value=act_v)
-        if st.button("Guardar Perfil 💾"):
+        
+        if st.button("GUARDAR DATOS 💾"):
             st.session_state.datos_usuarios[user].update({"peso": n_p, "edad": n_e, "actividad": n_a})
-            guardar_usuarios(); st.rerun()
-        if st.button("Cerrar Sesión 🚪"): st.session_state.autenticado = False; st.rerun()
+            guardar_usuarios(); st.success("¡PERFIL ACTUALIZADO!"); st.rerun()
+        if st.button("CERRAR SESIÓN 🚪"): st.session_state.autenticado = False; st.rerun()
 
     with tabs[1]: # NUTRICIÓN
         hoy = str(date.today())
         regs = [r for r in datos["registros"] if r["Fecha"] == hoy]
         neto = sum(r.get("Kcal", 0) for r in regs)
-        c1, c2, c3 = st.columns(3)
-        c1.metric("Meta", f"{kcal_obj:.0f}")
-        c2.metric("Consumo", f"{neto:.0f}")
-        c3.metric("Faltan", f"{kcal_obj-neto:.0f}")
         
-        sel = st.selectbox("Comida:", ["---"] + ["✨ MANUAL"] + sorted(list(st.session_state.base_alimentos.keys())))
+        st.metric("OBJETIVO", f"{kcal_obj:.0f}")
+        st.metric("NETO HOY", f"{neto:.0f}")
+        st.metric("DIFERENCIA", f"{kcal_obj-neto:.0f}")
+        
+        st.divider()
+        sel = st.selectbox("ALIMENTO:", ["---"] + ["✨ MANUAL"] + sorted(list(st.session_state.base_alimentos.keys())))
         if sel == "✨ MANUAL":
-            kcal_m = st.number_input("Kcal:")
-            if st.button("Añadir"):
+            kcal_m = st.number_input("KCAL TOTALES:")
+            if st.button("AÑADIR"):
                 st.session_state.datos_usuarios[user]["registros"].append({"Fecha": hoy, "Alimento": "Manual", "Kcal": round(kcal_m, 1)})
                 guardar_usuarios(); st.rerun()
         elif sel != "---":
             m = st.session_state.base_alimentos.get(sel, {})
             cal_b, med = m.get('Calorías', 0), m.get('Medida', 'Gr')
-            cant = st.number_input(f"Cantidad ({med})")
-            if st.button("Añadir ✅"):
+            cant = st.number_input(f"CANTIDAD ({med})")
+            if st.button("REGISTRAR ✅"):
                 factor = (cant/100) if med.lower() in ["gr", "ml"] else cant
                 st.session_state.datos_usuarios[user]["registros"].append({"Fecha": hoy, "Alimento": sel, "Kcal": round(cal_b * factor, 1)})
                 guardar_usuarios(); st.rerun()
 
-    with tabs[2]: # DEPORTE (SPINNING COMPLETO)
-        st.markdown("### ¿Qué has hecho hoy?")
-        tipo = st.selectbox("Entreno:", ["Gym", "Spinning", "Pasos", "Descanso"])
-        
-        if tipo == "Spinning":
-            c_km, c_min, c_kcal = st.columns(3)
-            km_spin = c_km.number_input("Km", min_value=0.0)
-            min_spin = c_min.number_input("Min", min_value=0)
-            kcal_spin = c_kcal.number_input("Kcal", min_value=0)
-            if st.button("Registrar Spinning 🚴"):
+    with tabs[2]: # DEPORTE
+        st.markdown("### ACTIVIDAD")
+        tipo = st.selectbox("TIPO:", ["GYM", "SPINNING", "PASOS", "CARDIO"])
+        if tipo == "SPINNING":
+            km_s = st.number_input("KILÓMETROS", 0.0)
+            min_s = st.number_input("MINUTOS", 0)
+            kcal_s = st.number_input("KCAL QUEMADAS", 0)
+            if st.button("GUARDAR SPINNING 🚴"):
                 st.session_state.datos_usuarios[user]["registros"].append({
                     "Fecha": hoy, "Momento": "Deporte", 
-                    "Alimento": f"Spinning: {km_spin}km / {min_spin}min", 
-                    "Kcal": -abs(float(kcal_spin))
-                })
-                guardar_usuarios(); st.success("¡Sesión guardada!"); st.rerun()
-        
-        elif tipo == "Pasos":
-            pasos = st.number_input("Total Pasos", value=8000)
-            if st.button("Registrar Pasos ✅"):
-                st.session_state.datos_usuarios[user]["registros"].append({
-                    "Fecha": hoy, "Momento": "Deporte", "Alimento": f"Pasos: {pasos}", "Kcal": 0
+                    "Alimento": f"Spinning: {km_s}km / {min_s}min", 
+                    "Kcal": -abs(float(kcal_s))
                 })
                 guardar_usuarios(); st.rerun()
+        elif tipo == "PASOS":
+            p_c = st.number_input("CANTIDAD DE PASOS", value=8000)
+            if st.button("GUARDAR PASOS ✅"):
+                st.session_state.datos_usuarios[user]["registros"].append({"Fecha": hoy, "Momento": "Deporte", "Alimento": f"Pasos: {p_c}", "Kcal": 0})
+                guardar_usuarios(); st.rerun()
         else:
-            if st.button(f"Registrar {tipo} ✅"):
+            if st.button(f"REGISTRAR {tipo} ✅"):
                 st.session_state.datos_usuarios[user]["registros"].append({"Fecha": hoy, "Momento": "Deporte", "Alimento": tipo, "Kcal": 0})
                 guardar_usuarios(); st.rerun()
 
-    with tabs[3]: # ALIMENTOS
+    with tabs[3]: # BASE DE DATOS
         df_b = pd.DataFrame(st.session_state.base_alimentos).T.reset_index().rename(columns={'index': 'Alimento'})
         df_b = df_b.drop(columns=[c for c in ['h','p','g','kcal','H','P','G','Kcal'] if c in df_b.columns], errors='ignore')
         df_ed = st.data_editor(df_b, num_rows="dynamic", use_container_width=True)
-        if st.button("Guardar Base 💾"):
+        if st.button("GUARDAR BASE 💾"):
             st.session_state.base_alimentos = df_ed.set_index('Alimento').to_dict('index')
             guardar_alimentos(); st.rerun()
 
     with tabs[4]: # HISTORIAL
         if datos["registros"]:
-            f_s = st.date_input("Día:", value=date.today())
+            f_s = st.date_input("DÍA:", value=date.today())
             df_h = pd.DataFrame(datos["registros"])
             df_d = df_h[df_h["Fecha"] == str(f_s)].copy()
             if not df_d.empty:
-                df_dia_ed = st.data_editor(df_d, use_container_width=True, key=f"h_{f_s}")
-                if st.button("Guardar Cambios Historial"):
+                st.data_editor(df_d, use_container_width=True, key=f"h_{f_s}")
+                if st.button("CONFIRMAR CAMBIOS 💾"):
                     otros = [r for r in datos["registros"] if r["Fecha"] != str(f_s)]
-                    st.session_state.datos_usuarios[user]["registros"] = otros + df_dia_ed.to_dict('records')
+                    st.session_state.datos_usuarios[user]["registros"] = otros + df_d.to_dict('records')
                     guardar_usuarios(); st.rerun()
                 
                 out = io.BytesIO()
                 with pd.ExcelWriter(out, engine='xlsxwriter') as w:
                     df_d.to_excel(w, index=False)
-                st.download_button("📥 Exportar Excel", data=out.getvalue(), file_name=f"{user}_{f_s}.xlsx")
-            else: st.info("Sin registros.")
+                st.download_button("📥 DESCARGAR EXCEL", data=out.getvalue(), file_name=f"Cuchitos_{user}_{f_s}.xlsx")
+            else: st.info("SIN DATOS.")
