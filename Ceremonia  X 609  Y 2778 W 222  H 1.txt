@@ -1,0 +1,7 @@
+Ceremonia : X 609  Y 2778 W 222  H 183
+
+Celebración: X 609  Y 4286  W 222 H 183
+
+FORMULARIO:  X 355  Y 8670  W 728 H 159
+
+Lienzo: X -3761 Y 0  W 1440  H 17391
