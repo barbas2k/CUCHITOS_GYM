@@ -5629,7 +5629,7 @@
         "Proteinas (g)": 0.0,
         "Hidratos (g)": 0.0,
         "Grasas (g)": 100.0,
-        "Medida": NaN
+        "Medida": "Ml"
     },
     "Aceite de colza": {
         "Codigo": 100103.0,
@@ -5701,7 +5701,7 @@
         "Proteinas (g)": 0.1,
         "Hidratos (g)": 0.0,
         "Grasas (g)": 99.9,
-        "Medida": NaN
+        "Medida": "Ml"
     },
     "Aceite de oliva virgen extra": {
         "Codigo": 100112.0,

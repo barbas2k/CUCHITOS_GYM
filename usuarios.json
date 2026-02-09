@@ -1236,6 +1236,13 @@
         "edad": 41,
         "peso": 96.0,
         "actividad": 5,
-        "registros": []
+        "registros": [
+            {
+                "Fecha": "2026-02-06",
+                "Momento": "Deporte",
+                "Alimento": "Spinning: 15.0km / 30min",
+                "Kcal": -250.0
+            }
+        ]
     }
 }
